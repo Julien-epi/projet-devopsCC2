@@ -1,0 +1,30 @@
+image: node:latest
+
+stages:
+  - build
+  - deploy
+
+before_script:
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+build_billetterie:
+  stage: build
+  script:
+    - echo "Installation des dépendances pour l'API Billetterie"
+    - npm install
+    - echo "Construction de l'application TypeScript pour l'API Billetterie"
+    - npm run build
+  only:
+    - main
+
+deploy_billetterie:
+  stage: deploy
+  script:
+    - scp -r * ${AWS_USER}@${BILLETTERIE_IP_AWS}:${BILLETTERIE_DEPLOY_PATH}
+    - ssh ${AWS_USER}@${BILLETTERIE_IP_AWS} "export MONGODB_URI=${MONGODB_URI} && cd ${BILLETTERIE_DEPLOY_PATH} && npm install --production && pm2 restart billetterie || pm2 start dist/index.js --name billetterie"
+  only:
+    - main

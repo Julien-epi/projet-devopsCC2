@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  billetterie:
+    build: ./billetterie
+    ports:
+      - "3001:3001"
+
+  event:
+    build: ./event
+    ports:
+      - "3000:3000"
+
+networks:
+  default:
+    driver: bridge

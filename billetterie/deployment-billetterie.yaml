@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billetterie-deployment
+  labels:
+    app: billetterie
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: billetterie
+  template:
+    metadata:
+      labels:
+        app: billetterie
+    spec:
+      containers:
+      - name: billetterie
+        image: julien94800/projet-devopscc2-billetterie:latest  
+        ports:
+        - containerPort: 3001

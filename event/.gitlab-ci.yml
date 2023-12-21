@@ -1,0 +1,30 @@
+image: node:latest
+
+stages:
+  - build
+  - deploy
+
+before_script:
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+build:
+  stage: build
+  script:
+    - echo "Installation des dépendances"
+    - npm install
+    - echo "Construction de l'application TypeScript"
+    - npm run build # Exécute la construction TypeScript (tsc)
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    - scp -r * ${AWS_USER}@${IP_AWS}:${DEPLOY_PATH_IN_INSTANCE}
+    - ssh ${AWS_USER}@${IP_AWS} "export MONGODB_URI=${MONGODB_URI} && cd ${DEPLOY_PATH_IN_INSTANCE} && npm install --production && node dist/index.js"
+  only:
+    - main

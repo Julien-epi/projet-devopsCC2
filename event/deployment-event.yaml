@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-deployment
+  labels:
+    app: event
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: event
+  template:
+    metadata:
+      labels:
+        app: event
+    spec:
+      containers:
+      - name: event
+        image: julien94800/projet-devopscc2-event:latest 
+        ports:
+        - containerPort: 3000
