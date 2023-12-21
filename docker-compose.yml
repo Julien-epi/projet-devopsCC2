@@ -11,6 +11,22 @@ services:
     ports:
       - "3000:3000"
 
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3002:3000"  
+    networks:
+      - app-network
+
 networks:
-  default:
-    driver: bridge
+  app-network:
+    driver: bridge  
